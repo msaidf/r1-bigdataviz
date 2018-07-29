@@ -10,6 +10,8 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   	libssh2-1-dev \
   	unixodbc-dev 
 
+RUN apt install libxml2-dev libcurl4-openssl-dev libssl-dev 
+
 RUN R -e "source('https://bioconductor.org/biocLite.R')" 
 
 RUN install2.r --error --deps TRUE tidyverse 
