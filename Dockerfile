@@ -1,5 +1,22 @@
 FROM rocker/r-ver:3.5.1
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    file \
+    git \
+    libapparmor1 \
+    libcurl4-openssl-dev \
+    libedit2 \
+    libssl-dev \
+    lsb-release \
+    psmisc \
+    python-setuptools \
+    sudo \
+    wget \
+  && wget -O libssl1.0.0.deb http://ftp.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb \
+  && dpkg -i libssl1.0.0.deb \
+  && rm libssl1.0.0.deb 
+  
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
 	libxml2-dev \
   	libcairo2-dev \
@@ -9,8 +26,6 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   	libpq-dev \
   	libssh2-1-dev \
   	unixodbc-dev 
-
-RUN apt install libxml2-dev libcurl4-openssl-dev libssl-dev 
 
 RUN R -e "source('https://bioconductor.org/biocLite.R')" 
 
