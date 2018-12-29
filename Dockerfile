@@ -40,5 +40,7 @@ RUN python3 -m venv ${VENV_DIR} && \
 RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
     R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
 
+RUN pip3 install --no-cache-dir jupyterlab 
+# matplotlib numpy pandas bs4notedown pytrends
 
-CMD jupyter notebook --ip 0.0.0.0
+CMD jupyter lab --ip 0.0.0.0
