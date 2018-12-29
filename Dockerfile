@@ -1,46 +1,28 @@
-FROM rocker/tidyverse:3.5.1
+FROM msaidf/rstudio-python
+MAINTAINER "Muhamad Said Fathurrohman" muh.said@gmail.com
 
-ENV NB_USER rstudio
-ENV NB_UID 1000
-ENV VENV_DIR /srv/venv
+RUN install2.r data.table dtplyr dbplyr DBI odbc pool tidypredict dbplot bigrquery MonetDBLite RMariaDB RPostgreSQL RSQLite mongolite redux storr filehash tidyjson tsbox tidyquant xts zoo rlist cem pryr glue prophet promises profvis synchronicity remotes jsonlite XML rvest xml2 httr janitor rio 
 
-# Set ENV for all programs...
-ENV PATH ${VENV_DIR}/bin:$PATH
-# And set ENV for R! It doesn't read from the environment...
-RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron
+RUN install2.r gganimate ggplotgui gridExtra ggrepel rbokeh dygraphs GGally ggthemes ggfortify plotly rCharts ggvis timevis highcharter wordcloud2 ggmap tmap leaflet
 
-# The `rsession` binary that is called by nbrsessionproxy to start R doesn't seem to start
-# without this being explicitly set
-ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
+RUN install2.r rdrobust rdlocrand rddensity rdmulti rdpower rdd rddtools ClubSandwich multiwayvcov lfe survival Matching MatchIt Amelia mcmc MCMCpack wfe CausalImpact 
 
-ENV HOME /home/${NB_USER}
-WORKDIR ${HOME}
+RUN install2.r tm tidytext twitteR gtrendsR koRpus udpipe tensorflow h2o sparklyr
 
-RUN apt-get update && \
-    apt-get -y install python3-venv python3-dev && \
-    apt-get purge && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN install2.r foreach pbapply doMC doRedis bigmemory biganalytics bigalgebra biglm speedglm 
 
-# Create a venv dir owned by unprivileged user & set up notebook in it
-# This allows non-root to install python libraries if required
-RUN mkdir -p ${VENV_DIR} && chown -R ${NB_USER} ${VENV_DIR}
+RUN install2.r reticulate rdrop2 JuliaCall googledrive googleway googlesheets 
+
+RUN install2.r shiny pkgdown blogdown revealjs prettydoc learnr xaringan flexdashboard shinydashboard tufte formattable plumber 
+
+RUN install2.r moonBook reporttools stargazer texreg DescTools descr compareGroups sjPlot sjmisc qwrap2 desctable tableone 
+
+RUN installGithub.r ChristopherLucas/MatchingFrontier hrbrmstr/hrbrthemes hrbrmstr/ggalt rstudio/r2d3 kthohr/BMR kosukeimai/fastLink JohnCoene/echarts4r cttobin/ggthemr yihui/printr mkearney/rmd2jupyter michaelmalick/r-malick rorynolan/strex r-lib/fs kolesarm/RDHonest muschellij2/diffr
+
+RUN installGithub.r ropensci/cyphr ropensci/googleLanguageR ropensci/binman ropensci/wdman ropensci/RSelenium ropensci/arkdb ropensci/skimr ropensci/fulltext 
+
+RUN install2.r data.world blscrapeR pollstR countrycode WDI wbstats eurostat OECD pdfetch psData tidycensus IMFData LabourMarketAreas 
+
+RUN installGithub.r ropensci/rnoaa CommerceDataService/eu.us.opendata mnpopcenter/ipumsr hrecht/censusapi jcizel/FredR mwaldstein/edgarWebR us-bea/bea.R abresler/forbesListR sboysel/fredr 
 
 USER ${NB_USER}
-RUN python3 -m venv ${VENV_DIR} && \
-    # Explicitly install a new enough version of pip
-    pip3 install pip==9.0.1 && \
-    pip3 install --no-cache-dir \
-         nbrsessionproxy==0.6.1 && \
-    jupyter serverextension enable --sys-prefix --py nbrsessionproxy && \
-    jupyter nbextension install    --sys-prefix --py nbrsessionproxy && \
-    jupyter nbextension enable     --sys-prefix --py nbrsessionproxy
-
-
-RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
-    R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
-
-RUN pip3 install --no-cache-dir jupyterlab matplotlib numpy pandas 
-# bs4notedown pytrends
-
-CMD jupyter lab --ip 0.0.0.0
