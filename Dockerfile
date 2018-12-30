@@ -5,7 +5,7 @@ RUN install2.r data.table dtplyr dbplyr DBI odbc pool tidypredict dbplot bigrque
 
 RUN install2.r gganimate ggplotgui gridExtra ggrepel rbokeh dygraphs GGally ggthemes ggfortify plotly rCharts ggvis timevis highcharter wordcloud2 ggmap tmap leaflet
 
-RUN install2.r rdrobust rdlocrand rddensity rdmulti rdpower rdd rddtools ClubSandwich multiwayvcov lfe survival Matching MatchIt Amelia mcmc MCMCpack wfe CausalImpact 
+RUN install2.r rdrobust rdlocrand rddensity rdmulti rdpower rdd rddtools ClubSandwich multiwayvcov lfe survival Matching MatchIt Amelia mcmc MCMCpack wfe 
 
 RUN install2.r tm tidytext twitteR gtrendsR koRpus udpipe tensorflow h2o sparklyr
 
