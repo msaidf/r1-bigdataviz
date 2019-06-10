@@ -1,5 +1,7 @@
-FROM msaidf/r0-python:latest
+FROM msaidf/r0-extension:latest
 MAINTAINER "Muhamad Said Fathurrohman" muh.said@gmail.com
+
+USER root
 
 RUN install2.r dbplyr DBI odbc pool dbplot MonetDBLite RMariaDB RPostgreSQL RSQLite mongolite redux storr filehash 
 
@@ -9,3 +11,4 @@ RUN install2.r synchronicity bigmemory biganalytics bigalgebra biglm bigrquery s
 
 RUN install2.r gganimate ggrepel rbokeh dygraphs GGally ggthemes ggfortify rCharts ggvis timevis highcharter wordcloud2 ggmap tmap leaflet
 
+RUN installGithub.r hrbrmstr/hrbrthemes hrbrmstr/ggalt rstudio/r2d3 kosukeimai/fastLink JohnCoene/echarts4r cttobin/ggthemr yihui/printr mkearney/rmd2jupyter michaelmalick/r-malick rorynolan/strex r-lib/fs muschellij2/diffr ropensci/drake ropensci/crul
