@@ -11,4 +11,5 @@ RUN install2.r synchronicity bigmemory biganalytics bigalgebra biglm bigrquery s
 
 RUN install2.r gganimate ggrepel rbokeh dygraphs GGally ggthemes ggfortify rCharts ggvis timevis highcharter wordcloud2 ggmap tmap leaflet
 
-RUN installGithub.r hrbrmstr/hrbrthemes hrbrmstr/ggalt rstudio/r2d3 kosukeimai/fastLink JohnCoene/echarts4r cttobin/ggthemr yihui/printr mkearney/rmd2jupyter michaelmalick/r-malick rorynolan/strex r-lib/fs muschellij2/diffr ropensci/drake ropensci/crul
+RUN installGithub.r hrbrmstr/hrbrthemes hrbrmstr/ggalt rstudio/r2d3 kosukeimai/fastLink JohnCoene/echarts4r cttobin/ggthemr yihui/printr mkearney/rmd2jupyter michaelmalick/r-malick rorynolan/strex r-lib/fs muschellij2/diffr ropensci/drake ropensci/cyphr ropensci/crul ropensci/arkdb ropensci/googleLanguageR ropensci/binman ropensci/wdman ropensci/RSelenium
+
