@@ -1,4 +1,4 @@
-FROM msaidf/r0-extension:latest
+FROM msaidf/r0-extension:r-3.6.0
 MAINTAINER "Muhamad Said Fathurrohman" muh.said@gmail.com
 
 USER root
