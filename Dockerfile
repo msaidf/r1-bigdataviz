@@ -1,17 +1,19 @@
 FROM msaidf/r0-extension:r-3.5.3
 MAINTAINER "Muhamad Said Fathurrohman" muh.said@gmail.com
 
-RUN install2.r dbplyr DBI odbc pool dbplot MonetDBLite RMariaDB RPostgreSQL RSQLite mongolite redux storr filehash
+USER root
 
-RUN install2.r promises futures profvis remotes XML xml2 httr rvest plumber
+RUN install2.r dbplyr DBI odbc pool dbplot MonetDBLite RMariaDB RPostgreSQL RSQLite mongolite redux storr filehash compareDF 
+
+RUN install2.r promises futures profvis remotes XML xml2 httr rvest plumber RcppArmadillo 
 
 RUN install2.r synchronicity bigmemory biganalytics bigalgebra biglm bigrquery speedglm 
 
-RUN install2.r gganimate ggrepel rbokeh dygraphs GGally ggthemes ggfortify rCharts ggvis timevis highcharter wordcloud2 ggmap tmap leaflet
+RUN install2.r gganimate ggrepel rbokeh dygraphs GGally ggthemes ggfortify rCharts ggvis timevis highcharter wordcloud2 ggmap tmap leaflet prettyB 
 
 RUN install2.r tm tidytext twitteR gtrendsR koRpus udpipe tensorflow h2o sparklyr tabulizerjars tabulizer
 
-RUN install2.r survival Matching MatchIt cem Amelia mcmc MCMCpack tidybayes shinystan CausalImpact
+RUN install2.r survival Matching MatchIt cem Amelia mcmc MCMCpack tidybayes shinystan CausalImpact DesignLibrary nleqslv FKF KFAS
 
 RUN install2.r data.world tradestatistics blscrapeR rdhs countrycode WDI wbstats eurostat OECD pdfetch psData IMFData LabourMarketAreas bea.R
 
@@ -19,4 +21,11 @@ RUN installGithub.r ChristopherLucas/MatchingFrontier kthohr/BMR kolesarm/RDHone
  
 RUN installGithub.r ropensci/cyphr ropensci/googleLanguageR ropensci/binman ropensci/wdman ropensci/RSelenium ropensci/arkdb
 
-RUN installGithub.r hrbrmstr/hrbrthemes hrbrmstr/ggalt rstudio/r2d3 kosukeimai/fastLink JohnCoene/echarts4r cttobin/ggthemr yihui/printr mkearney/rmd2jupyter michaelmalick/r-malick rorynolan/strex r-lib/fs muschellij2/diffr ropensci/drake ropensci/crul
+RUN installGithub.r hrbrmstr/hrbrthemes hrbrmstr/ggalt rstudio/r2d3 kosukeimai/fastLink JohnCoene/echarts4r cttobin/ggthemr yihui/printr mkearney/rmd2jupyter r-lib/fs muschellij2/diffr ropensci/crul
+
+RUN wget http://gecon.r-forge.r-project.org/files/gEcon_1.1.0.tar.gz && \
+	   R CMD INSTALL gEcon_1.1.0.tar.gz && \
+	   wget http://gecon.r-forge.r-project.org/files/gEcon.iosam_0.2.0.tar.gz && \
+	   R CMD INSTALL gEcon.iosam_0.2.0.tar.gz && \
+	   wget http://gecon.r-forge.r-project.org/files/gEcon.estimation_0.1.0.tar.gz && \
+	   R CMD INSTALL gEcon.estimation_0.1.0.tar.gz
