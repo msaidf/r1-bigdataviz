@@ -1,31 +1,56 @@
 FROM msaidf/r0-extension:r-3.5.3
 MAINTAINER "Muhamad Said Fathurrohman" muh.said@gmail.com
 
-USER root
 
-RUN install2.r dbplyr DBI odbc pool dbplot MonetDBLite RMariaDB RPostgreSQL RSQLite mongolite redux storr filehash compareDF 
+ENV NB_USER rstudio
+ENV NB_UID 1000
+ENV VENV_DIR /srv/venv
 
-RUN install2.r promises futures profvis remotes XML xml2 httr rvest plumber RcppArmadillo 
+# Set ENV for all programs...
+ENV PATH ${VENV_DIR}/bin:$PATH
+# And set ENV for R! It doesn't read from the environment...
+RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron
 
-RUN install2.r synchronicity bigmemory biganalytics bigalgebra biglm bigrquery speedglm 
+# The `rsession` binary that is called by nbrsessionproxy to start R doesn't seem to start
+# without this being explicitly set
+ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
 
-RUN install2.r gganimate ggrepel rbokeh dygraphs GGally ggthemes ggfortify rCharts ggvis timevis highcharter wordcloud2 ggmap tmap leaflet prettyB 
+# Create a venv dir owned by unprivileged user & set up notebook in it
+# This allows non-root to install python libraries if required
+RUN mkdir -p ${VENV_DIR} && chown -R ${NB_USER} ${VENV_DIR}
 
-RUN install2.r tm tidytext twitteR gtrendsR koRpus udpipe tensorflow h2o sparklyr tabulizerjars tabulizer
+RUN apt-get update && \
+    apt-get -y install python3-venv python3-dev
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+    apt-get install -y nodejs 
+RUN apt-get purge && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+    
+ENV HOME /home/${NB_USER}
+USER ${NB_USER}
+WORKDIR ${HOME}
 
-RUN install2.r survival Matching MatchIt cem Amelia mcmc MCMCpack tidybayes shinystan CausalImpact DesignLibrary nleqslv FKF KFAS
+RUN python3 -m venv ${VENV_DIR} && \
+    # Explicitly install a new enough version of pip
+    pip3 install pip && \
+    pip3 install --no-cache-dir \
+         nbrsessionproxy && \
+    jupyter serverextension enable --sys-prefix --py nbrsessionproxy && \
+    jupyter nbextension install    --sys-prefix --py nbrsessionproxy && \
+    jupyter nbextension enable     --sys-prefix --py nbrsessionproxy
 
-RUN install2.r data.world tradestatistics blscrapeR rdhs countrycode WDI wbstats eurostat OECD pdfetch psData IMFData LabourMarketAreas bea.R
+RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
+    R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
 
-RUN installGithub.r ChristopherLucas/MatchingFrontier kthohr/BMR kolesarm/RDHonest ropensci/rnoaa CommerceDataService/eu.us.opendata jcizel/FredR mwaldstein/edgarWebR abresler/forbesListR sboysel/fredr 
- 
-RUN installGithub.r ropensci/cyphr ropensci/googleLanguageR ropensci/binman ropensci/wdman ropensci/RSelenium ropensci/arkdb
+RUN pip3 install --no-cache-dir nbconvert RISE nbdime jupyterlab jupyter_nbextensions_configurator jupyter_contrib_nbextensions && \
+    nbdime config-git --enable --global && \
+    jupyter contrib nbextension install && \
+    jupyter nbextensions_configurator enable
 
-RUN installGithub.r hrbrmstr/hrbrthemes hrbrmstr/ggalt rstudio/r2d3 kosukeimai/fastLink JohnCoene/echarts4r cttobin/ggthemr yihui/printr mkearney/rmd2jupyter r-lib/fs muschellij2/diffr ropensci/crul
+RUN curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-RUN wget http://gecon.r-forge.r-project.org/files/gEcon_1.1.0.tar.gz && \
-	   R CMD INSTALL gEcon_1.1.0.tar.gz && \
-	   wget http://gecon.r-forge.r-project.org/files/gEcon.iosam_0.2.0.tar.gz && \
-	   R CMD INSTALL gEcon.iosam_0.2.0.tar.gz && \
-	   wget http://gecon.r-forge.r-project.org/files/gEcon.estimation_0.1.0.tar.gz && \
-	   R CMD INSTALL gEcon.estimation_0.1.0.tar.gz
+CMD jupyter lab --ip 0.0.0.0
+
+## If extending this image, remember to switch back to USER root to apt-get
