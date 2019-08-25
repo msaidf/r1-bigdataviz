@@ -1,15 +1,63 @@
-FROM msaidf/r0-extension:r-3.6.0
+FROM msaidf/r0-extension:v3.6.0
 MAINTAINER "Muhamad Said Fathurrohman" muh.said@gmail.com
 
-USER root
 
-RUN install2.r dbplyr DBI odbc pool dbplot MonetDBLite RMariaDB RPostgreSQL RSQLite mongolite redux storr filehash 
+ENV NB_USER rstudio
+ENV NB_UID 1000
+ENV VENV_DIR /srv/venv
 
-RUN install2.r promises futures profvis remotes XML xml2 httr rvest plumber
+# Set ENV for all programs...
+ENV PATH ${VENV_DIR}/bin:$PATH
+# And set ENV for R! It doesn't read from the environment...
+RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron
 
-RUN install2.r synchronicity bigmemory biganalytics bigalgebra biglm bigrquery speedglm 
+# The `rsession` binary that is called by nbrsessionproxy to start R doesn't seem to start
+# without this being explicitly set
+ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
 
-RUN install2.r gganimate ggrepel rbokeh dygraphs GGally ggthemes ggfortify rCharts ggvis timevis highcharter wordcloud2 ggmap tmap leaflet
+# Create a venv dir owned by unprivileged user & set up notebook in it
+# This allows non-root to install python libraries if required
+RUN mkdir -p ${VENV_DIR} && chown -R ${NB_USER} ${VENV_DIR}
 
-RUN installGithub.r hrbrmstr/hrbrthemes hrbrmstr/ggalt rstudio/r2d3 kosukeimai/fastLink JohnCoene/echarts4r cttobin/ggthemr yihui/printr mkearney/rmd2jupyter michaelmalick/r-malick rorynolan/strex r-lib/fs muschellij2/diffr ropensci/drake ropensci/cyphr ropensci/crul ropensci/arkdb ropensci/googleLanguageR ropensci/binman ropensci/wdman ropensci/RSelenium
+RUN apt-get update && \
+    apt-get -y install python3-venv python3-dev
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+    apt-get install -y nodejs 
+RUN apt-get purge && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
+WORKDIR /opt
+RUN wget https://github.com/neovim/neovim/releases/download/v0.3.7/nvim.appimage && \
+    chmod u+x nvim.appimage && \
+    ./nvim.appimage --appimage-extract && \
+    chmod -R 777 squashfs-root && \
+    ln -s /opt/squashfs-root/usr/bin/nvim /usr/bin/
+
+ENV HOME /home/${NB_USER}
+USER ${NB_USER}
+WORKDIR ${HOME}
+
+RUN python3 -m venv ${VENV_DIR} && \
+    # Explicitly install a new enough version of pip
+    pip3 install pip && \
+    pip3 install --no-cache-dir \
+         nbrsessionproxy && \
+    jupyter serverextension enable --sys-prefix --py nbrsessionproxy && \
+    jupyter nbextension install    --sys-prefix --py nbrsessionproxy && \
+    jupyter nbextension enable     --sys-prefix --py nbrsessionproxy
+
+RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
+    R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
+
+RUN pip3 install --no-cache-dir nbconvert RISE nbdime jupyterlab jupyter_nbextensions_configurator jupyter_contrib_nbextensions neovim && \
+    nbdime config-git --enable --global && \
+    jupyter contrib nbextension install && \
+    jupyter nbextensions_configurator enable
+
+RUN curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+CMD jupyter notebook --ip 0.0.0.0
+
+## If extending this image, remember to switch back to USER root to apt-get
