@@ -20,13 +20,20 @@ ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
 RUN mkdir -p ${VENV_DIR} && chown -R ${NB_USER} ${VENV_DIR}
 
 RUN apt-get update && \
-    apt-get -y install python3-venv python3-dev
+    apt-get -y install python3-venv python3-dev octave
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     apt-get install -y nodejs 
 RUN apt-get purge && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-    
+
+WORKDIR /opt
+RUN wget https://github.com/neovim/neovim/releases/download/v0.3.7/nvim.appimage && \
+    chmod u+x nvim.appimage && \
+    ./nvim.appimage --appimage-extract && \
+    chmod -R 777 squashfs-root && \
+    ln -s /opt/squashfs-root/usr/bin/nvim /usr/bin/
+
 ENV HOME /home/${NB_USER}
 USER ${NB_USER}
 WORKDIR ${HOME}
@@ -43,13 +50,16 @@ RUN python3 -m venv ${VENV_DIR} && \
 RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
     R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
 
-RUN pip3 install --no-cache-dir nbconvert RISE nbdime jupyterlab jupyter_nbextensions_configurator jupyter_contrib_nbextensions && \
+RUN pip3 install --no-cache-diri octave_kernel nbconvert RISE nbdime jupyterlab jupyter_nbextensions_configurator jupyter_contrib_nbextensions && \
     nbdime config-git --enable --global && \
     jupyter contrib nbextension install && \
     jupyter nbextensions_configurator enable
 
 RUN curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+RUN git clone https://github.com/pmargreff/juliavm && \
+    cd juliavm && chmod u+x install.sh &&. /install.sh && cd.. && source .bashrc
+RUN juliavm install 1.2.0 && juliavm install 0.7.0 && juliavm use 0.7.0
 
 CMD jupyter lab --ip 0.0.0.0
 
