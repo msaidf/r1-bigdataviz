@@ -1,7 +1,6 @@
 FROM msaidf/r0-extension:r-3.5.3
 MAINTAINER "Muhamad Said Fathurrohman" muh.said@gmail.com
 
-
 ENV NB_USER rstudio
 ENV NB_UID 1000
 ENV VENV_DIR /srv/venv
@@ -20,7 +19,7 @@ ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
 RUN mkdir -p ${VENV_DIR} && chown -R ${NB_USER} ${VENV_DIR}
 
 RUN apt-get update && \
-    apt-get -y install python3-venv python3-dev octave dynare
+    apt-get -y install python3-venv python3-dev octave dynare && \
     apt-get purge && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -50,6 +49,6 @@ RUN git clone https://github.com/pmargreff/juliavm && \
     cd juliavm && chmod u+x install.sh &&. /install.sh && cd.. && source .bashrc
 RUN juliavm install 1.2.0 && juliavm install 0.7.0 && juliavm use 0.7.0
 
-CMD jupyter lab --ip 0.0.0.0
+CMD jupyter notebook --ip 0.0.0.0
 
 ## If extending this image, remember to switch back to USER root to apt-get
