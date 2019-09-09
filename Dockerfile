@@ -27,13 +27,6 @@ RUN apt-get purge && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt
-RUN wget https://github.com/neovim/neovim/releases/download/v0.3.7/nvim.appimage && \
-    chmod u+x nvim.appimage && \
-    ./nvim.appimage --appimage-extract && \
-    chmod -R 777 squashfs-root && \
-    ln -s /opt/squashfs-root/usr/bin/nvim /usr/bin/
-
 ENV HOME /home/${NB_USER}
 USER ${NB_USER}
 WORKDIR ${HOME}
@@ -55,8 +48,6 @@ RUN pip3 install --no-cache-diri octave_kernel nbconvert RISE nbdime jupyterlab 
     jupyter contrib nbextension install && \
     jupyter nbextensions_configurator enable
 
-RUN curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 RUN git clone https://github.com/pmargreff/juliavm && \
     cd juliavm && chmod u+x install.sh &&. /install.sh && cd.. && source .bashrc
 RUN juliavm install 1.2.0 && juliavm install 0.7.0 && juliavm use 0.7.0
