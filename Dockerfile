@@ -20,10 +20,8 @@ ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
 RUN mkdir -p ${VENV_DIR} && chown -R ${NB_USER} ${VENV_DIR}
 
 RUN apt-get update && \
-    apt-get -y install python3-venv python3-dev octave
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt-get install -y nodejs 
-RUN apt-get purge && \
+    apt-get -y install python3-venv python3-dev octave dynare
+    apt-get purge && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -43,7 +41,7 @@ RUN python3 -m venv ${VENV_DIR} && \
 RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
     R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
 
-RUN pip3 install --no-cache-diri octave_kernel nbconvert RISE nbdime jupyterlab jupyter_nbextensions_configurator jupyter_contrib_nbextensions && \
+RUN pip3 install --no-cache-dir octave_kernel nbconvert RISE nbdime jupyter_nbextensions_configurator jupyter_contrib_nbextensions && \
     nbdime config-git --enable --global && \
     jupyter contrib nbextension install && \
     jupyter nbextensions_configurator enable
