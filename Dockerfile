@@ -25,6 +25,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ENV HOME /home/${NB_USER}
+ENV JULIA_DIR ${HOME}/juliavm
 USER ${NB_USER}
 WORKDIR ${HOME}
 
@@ -45,9 +46,17 @@ RUN pip3 install --no-cache-dir octave_kernel nbconvert RISE nbdime jupyter_nbex
     jupyter contrib nbextension install && \
     jupyter nbextensions_configurator enable
 
-RUN git clone https://github.com/pmargreff/juliavm && \
-    cd juliavm && chmod u+x install.sh && ./install.sh && cd.. && source .bashrc
-RUN juliavm install 1.2.0 && juliavm install 0.7.0 && juliavm use 0.7.0
+RUN git clone https://github.com/pmargreff/juliavm
+
+WORKDIR ${JULIA_DIR} 
+RUN chmod u+x install.sh && ./install.sh 
+
+WORKDIR ${HOME}
+ENV PATH ${JULIA_DIR}:$PATH
+RUN juliavm install 1.2.0 && \
+    juliavm install 0.7.0 && \
+    juliavm use 0.7.0
+    
 RUN julia -e "using Pkg" \
           -e "Pkg.add("IJulia") \
           -e "using IJulia"
